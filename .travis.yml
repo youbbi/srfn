@@ -10,7 +10,7 @@ env:
 deploy:
   provider: heroku
   api_key:
-    secure: N2p2Lw+aikwYTKLCFAE5XlHxW4mZxEw7ms2N42Fq15jeFCh6huXDJluH28gdlfsy0pmMYM5FZl/V/tL+i3XkYsispjyXeph2OyxsPOk+j7KG5veqomTdwkTi3Tep/tqHqsi+OqFjnWdwgTPV/DoRGxbVawQt4z6wP28dQy1B5cw=
-  app: srfn
+    secure: BhMWILWiB0BVTqkEvFWrgWVv+Kx8UJSVO51J1CFDNJVp2qsud1d9EATiAO0rHX4NQuvbyHKqLfrZVj7xQea/3msvEMXi/7gn6fBoFnDC2GDxsdXROr4zBYQR45Od5g4LkPJGYX20FVFcBmipJAD7YluhSkejT198YKdJv9o71kk=
+  app: blooming-ravine-4249
   on:
     repo: errows/srfn
