@@ -10,7 +10,7 @@ env:
 deploy:
   provider: heroku
   api_key:
-    secure: BhMWILWiB0BVTqkEvFWrgWVv+Kx8UJSVO51J1CFDNJVp2qsud1d9EATiAO0rHX4NQuvbyHKqLfrZVj7xQea/3msvEMXi/7gn6fBoFnDC2GDxsdXROr4zBYQR45Od5g4LkPJGYX20FVFcBmipJAD7YluhSkejT198YKdJv9o71kk=
-  app: blooming-ravine-4249
+    secure: LICvW0ulFjHTRN6ytaoBGU8CmiStp9UusRmOZ/USTN31SA2NXIjVD04J4BrrLVVYqQOzlgZ9w9hb56SKZgDtNGOqpM29x01hXHO5m1bIij9dL/ptnhIBs1Mce36ufi+JMAbVyky8LeIeuv+hkN+zUik8rrl117GphxmGJ8fugfM=
+  app: vast-spire-3012
   on:
     repo: errows/srfn
