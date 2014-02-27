@@ -16,6 +16,14 @@ Clone this project, cd into it, modify ```settings.json``` with your Mixpanel AP
 $ mrt run --settings settings.json
 ```
 
+###Tip
+
+If you don't want to commit the changes to the settings.json file, tell GIT to ignore the changes:
+
+``` sh
+git update-index --assume-unchanged settings.json
+```
+
 ##Deploying to Heroku
 
 Mixpanel API key and secret need to be added as a ```METEOR_SETTINGS``` environment variable:
