@@ -1,23 +1,22 @@
 <head>
   <title>srfn</title>
   <style>
-    path.now {
-      stroke: rgba(120, 150, 120, 1);
-    }
-    path.compare {
-      stroke: rgba(80, 120, 150, 0.5);
-    }
-    path {
+    .now path {
       stroke-width: 1;
+      stroke: rgba(100, 140, 180, 1);
       fill: none;
+    }
+    .compare path {
+      /*stroke: rgba(80, 120, 120, 0.2);*/
+      fill: rgba(100, 140, 180, 0.15);
     }
     body {
       padding:10px;
-      background: #131313;
+      background: #eee;
       font-family: Arial, Helvetica, sans-serif;
     }
     .title {
-      color: #444;
+      color: rgba(100, 140, 180, 0.8);
       font-size:10px;
     }
     .edit {
@@ -37,6 +36,7 @@
 </template>
 
 <template name="dashboard">
+  <div class="pull-right"><a href="#" class="refresh"><i class="icon-refresh"></i></a></div>
   <div class="graphs row-fluid">
     {{#spanSplit metrics}}
       {{> metric}}
@@ -56,8 +56,11 @@
   <div class="container-fluid">
     {{#each metrics}}
       <div class="row-fluid edit">
-        <div class="span10 offset1"> 
+        <div class="span8 offset1"> 
           <input id="mixpanel_url_{{_id}}" data-objectid="{{_id}}" data-prop="mixpanel_url" class="span12 live-input" type="text" value="{{mixpanel_url}}" />
+        </div>
+        <div class="span2">
+          <a href="#" class="btn btn-small btn-default removeMetric"><i class="icon-remove"></i> Delete</a>
         </div>
       </div>
     {{/each}}

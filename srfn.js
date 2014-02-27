@@ -38,7 +38,7 @@ if (Meteor.isClient) {
         return options.fn(item, {  });
       });
       count += 1;
-      if (count == 3) { 
+      if (count == 3) {
         out += '</div><div class="row-fluid">';
         count = 0;
       }
@@ -68,58 +68,74 @@ if (Meteor.isClient) {
 
     var json = this.data.data;
 
-    var max=0, min=0, len=0;
-    for(var team in json) {
-      min = d3.min([d3.min(json[team]), min]);
-      max = d3.max([d3.max(json[team]), max]);
-      len = d3.max([json[team].length, len]);
-    }
+    var parseDate = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
+    json.forEach(function(d) {
+      d.date = parseDate(d.date);
+    });
 
     var path = "#sparkline_"+this.data._id;
+    var h = $(path).height(),
+        w = $(path).width();
+    var max=0, min=0, len=0;
 
-    var h = $(path).height(), 
-        w = $(path).width(),
-        p = 2,
-        x = d3.scale.linear().domain([0, len]).range([0, w]),
-        y = d3.scale.linear().domain([0, max*1.5]).range([h, 0]),
-        line = d3.svg.line()
-                     .x(function(d, i) { return x(i); })
-                     .y(function(d) { return y(d); });
 
-    var svg = d3.select(path).append("svg:svg").attr("height", h).attr("width", w);
+    max = d3.max(json, function(o) { return d3.max([o.now, o.compare]); });
 
-    var div = d3.select("body").append("div")   
-        .attr("class", "tooltip")               
-        .style("opacity", 0);
+    var x = d3.time.scale().domain(d3.extent(json, function(d) { return d.date; })).range([0, w]);
+    var y = d3.scale.linear().domain([0, max]).range([h, 0]);
 
-    for(var team in json) {
-        var g = svg.append("svg:g");
-        g.append("svg:path")
-         .attr("d", line(json[team]))
-         .attr("class", "team " + team);
-        g.append("svg:title")
-         .text(team);
-    }
+    var line = d3.svg.line()
+      .x(function(d) { return x(d.date); })
+      .y(function(d) { return y(d.now); });
 
-// svg.selectAll("dot")    
-//         .data(data)         
-//     .enter().append("circle")                               
-//         .attr("r", 5)       
-//         .attr("cx", function(d) { return x(d.date); })       
-//         .attr("cy", function(d) { return y(d.close); })     
-//         .on("mouseover", function(d) {      
-//             div.transition()        
-//                 .duration(200)      
-//                 .style("opacity", .9);      
-//             div .html(formatTime(d.date) + "<br/>"  + d.close)  
-//                 .style("left", (d3.event.pageX) + "px")     
-//                 .style("top", (d3.event.pageY - 28) + "px");    
-//             })                  
-//         .on("mouseout", function(d) {       
-//             div.transition()        
-//                 .duration(500)      
-//                 .style("opacity", 0);   
-//         });
+    var area = d3.svg.area()
+      .x(function(d) { return x(d.date); })
+      .y0(h)
+      .y1(function(d,i) { return y(d.compare); });
+
+    var svg = d3.select(path).append("svg").attr("height", h).attr("width", w);
+
+    var now = svg.selectAll(".now")
+        .data([json])
+        .enter().append("g")
+        .attr("class", "now");
+
+    now.append("path")
+        .attr("class", "line")
+        .attr("d", function(d) { return line(d); });
+
+    var compare = svg.selectAll(".compare")
+        .data([json])
+        .enter().append("g")
+        .attr("class", "compare");
+
+    compare.append("path")
+        .attr("class", "line")
+        .attr("d", function(d) { return area(d); });
+
+
+
+
+  // var now = svg.selectAll(".now")
+  //     .data(json.now)
+  //     .enter().append("g")
+  //     .attr("class", "now");
+
+  // now.append("path")
+  //     .attr("class", "line")
+  //     .attr("d", function(d) { return line(d.value); });
+
+    // var g = svg.append("svg:g").data(json.now)
+    //         .enter()
+    //         .append("svg:path")
+    //         .attr("d", function(d) {return line(d.value);})
+    //         .attr("class", "now");
+
+    // var g = svg.append("svg:g").data(json.compare)
+    //         .enter()
+    //         .append("svg:path")
+    //         .attr("d", function(d) {return area(d.value);})
+    //         .attr("class", "compare");
 
 
 
@@ -141,7 +157,6 @@ if (Meteor.isClient) {
 
   Template.metrics.events({
     'click .addMetric' : function(e) {
-      console.log(e.target);
       e.preventDefault();
       Metrics.insert({});
     },
@@ -156,6 +171,12 @@ if (Meteor.isClient) {
     },
   });
 
+  Template.dashboard.events({
+    'click .refresh' : function(e) {
+      e.preventDefault();
+      Meteor.call("fetchMetrics");
+    }
+  });
 
 }
 
@@ -182,8 +203,6 @@ if (Meteor.isServer) {
 
   var fetch_metric = function(metric){
 
-    var data = {"now":[], "compare":[]};
-    
     var Mixpanel_Exporter = Meteor.require('node-mixpanel-data-exporter')
     var mixpanel_exporter = new Mixpanel_Exporter({
       api_key: mixpanel_settings.key,
@@ -211,11 +230,17 @@ if (Meteor.isServer) {
 
     var result = mixpanel_exporter.segmentationSync(_.extend(metric.options, basics, now));
 
+    var data = [], data2 = [];
+
     res = JSON.parse(result.body);
     _.each(res.data.values, function(value, key){
       _.each(value, function(val, k){
-        data.now.push(val);
+        data.push({date:k,now:val});
       });
+    });
+
+    data = _(data).sortBy(function(datum) {
+        return datum.date;
     });
 
     var result = mixpanel_exporter.segmentationSync(_.extend(metric.options, basics, compare));
@@ -223,9 +248,21 @@ if (Meteor.isServer) {
     res = JSON.parse(result.body);
     _.each(res.data.values, function(value, key){
       _.each(value, function(val, k){
-        data.compare.push(val);
+        data2.push({date:k,compare:val});
       });
     });
+
+    data2 = _(data2).sortBy(function(datum2) {
+        return datum2.date;
+    });
+
+    _.each(data, function(val, i) {
+      val.compare = data2[i].compare;
+    });
+
+
+
+    console.log(data);
     Metrics.update({_id:metric._id}, {$set: {data: data}});
   }
 
@@ -249,9 +286,7 @@ if (Meteor.isServer) {
 
 
   Meteor.startup(function () {
-
-    // Meteor.setInterval(fetch_metrics_data, 10 * 1000);
+    Meteor.setInterval(fetch_metrics_data, 30 * 60 * 1000);
     fetch_metrics_data();
   });
 }
-
