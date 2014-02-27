@@ -10,8 +10,16 @@ Install [Meteor](http://meteor.com) and [Meteorite](https://github.com/oortcloud
 
 ##Running srfn
 
-Clone this project, cd into it and then:
+Clone this project, cd into it, modify ```settings.json``` with your Mixpanel API key and secret and then:
 
 ``` sh
-$ mrt run
+$ mrt run --settings settings.json
+```
+
+##Deploying to Heroku
+
+Mixpanel API key and secret need to be added as a ```METEOR_SETTINGS``` environment variable:
+
+``` sh
+heroku config:add METEOR_SETTINGS='{"mixpanel_settings" : {"key": "AAA","secret": "BBB"}}'
 ```
