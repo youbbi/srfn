@@ -184,12 +184,6 @@ if (Meteor.isClient) {
 
 if (Meteor.isServer) {
 
-  //move to env settings
-  var mixpanel_settings = {
-    key: "xxx",
-    secret: "xxx"
-  }
-
   Date.prototype.yyyymmdd = function() {
     var yyyy = this.getFullYear().toString();
     var mm   = (this.getMonth()+1).toString();
@@ -203,10 +197,11 @@ if (Meteor.isServer) {
 
   var fetch_metric = function(metric){
 
+
     var Mixpanel_Exporter = Meteor.require('node-mixpanel-data-exporter')
     var mixpanel_exporter = new Mixpanel_Exporter({
-      api_key: mixpanel_settings.key,
-      api_secret: mixpanel_settings.secret
+      api_key: Meteor.settings.mixpanel_settings.key,
+      api_secret: Meteor.settings.mixpanel_settings.secret
     });
 
     mixpanel_exporter.segmentationSync = Meteor._wrapAsync(mixpanel_exporter.segmentation.bind(mixpanel_exporter));
@@ -287,6 +282,6 @@ if (Meteor.isServer) {
 
   Meteor.startup(function () {
     Meteor.setInterval(fetch_metrics_data, 30 * 60 * 1000);
-    fetch_metrics_data();
+    // fetch_metrics_data();
   });
 }
