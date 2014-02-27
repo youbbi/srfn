@@ -31,3 +31,17 @@ Mixpanel API key and secret need to be added as a ```METEOR_SETTINGS``` environm
 ``` sh
 heroku config:add METEOR_SETTINGS='{"mixpanel_settings" : {"key": "AAA","secret": "BBB"}}'
 ```
+
+##Tests
+
+Start by installing [Laika](http://arunoda.github.io/laika/) and then you can, as explained in the Laika doc, start a mongodb server for the tests and run the tests:
+
+``` sh
+$ mongod --smallfiles --noprealloc --nojournal
+```
+
+in another window:
+
+``` sh
+$ laika
+```

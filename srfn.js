@@ -255,9 +255,6 @@ if (Meteor.isServer) {
       val.compare = data2[i].compare;
     });
 
-
-
-    console.log(data);
     Metrics.update({_id:metric._id}, {$set: {data: data}});
   }
 
