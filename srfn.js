@@ -13,7 +13,6 @@ Router.map(function () {
   this.route('metrics', {
     path: '/metrics'
   });
-
 });
 
 function extract_options(mixpanel_url){
@@ -206,13 +205,6 @@ if (Meteor.isClient) {
 
 if (Meteor.isServer) {
 
-  Date.prototype.yyyymmdd = function() {
-    var yyyy = this.getFullYear().toString();
-    var mm   = (this.getMonth()+1).toString();
-    var dd   = this.getDate().toString();
-    return yyyy + "-" + (mm[1]?mm:"0"+mm[0]) + "-"  + (dd[1]?dd:"0"+dd[0]);
-  };
-
   var fetch_metrics_data = function () {
     Meteor.call("fetchMetrics");
   }
@@ -232,17 +224,14 @@ if (Meteor.isServer) {
       "unit": "hour"
     }
 
-    var d = new Date();
-
     var now = {
-      to_date: new Date().yyyymmdd(),
-      from_date: new Date(d.setDate(d.getDate()-2)).yyyymmdd()
+      to_date: moment().format("YYYY-MM-DD"),
+      from_date: moment().subtract("days",2).format("YYYY-MM-DD")
     }
 
-    //will need to make that cleaner - weird substractions
     var compare = {
-      to_date: new Date(d.setDate(d.getDate()-5)).yyyymmdd(),
-      from_date: new Date(d.setDate(d.getDate()-2)).yyyymmdd()
+      to_date: moment().subtract("days",7).format("YYYY-MM-DD"),
+      from_date: moment().subtract("days",9).format("YYYY-MM-DD")
     }
 
     var result = mixpanel_exporter.segmentationSync(_.extend(metric.options, basics, now));
