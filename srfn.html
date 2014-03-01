@@ -2,11 +2,48 @@
   <title>srfn</title>
 </head>
 
-<body>
-  {{> hello}}
-</body>
+<template name="layout">
+  <div class="container-fluid">
+    <div class="navbar navbar-fixed-top">
+      <div class="nav pull-right">
+        <a href="/" class="home"><i class="icon-home"></i></a>
+        <a href="/metrics" class="crud-metrics"><i class="icon-edit"></i></a>
+        <a href="#" class="refresh"><i class="icon-repeat"></i></a>
+      </div>
+    </div>
+    {{yield}}
+  </div>
+</template>
 
-<template name="hello">
-  <h1>Hello {{greeting}} !!!</h1>
-  <input type="button" value="Click" />
+<template name="dashboard">
+  <div class="graphs row-fluid">
+    {{#spanSplit metrics}}
+      {{> metric}}
+    {{/spanSplit}}
+  </div>
+</template>
+
+<template name="metric">
+  <div class="graph span4">
+    <div id="sparkline_{{_id}}" class="sparkline"></div>
+    <div class="title">{{options_string}}</div>
+  </div>
+</template>
+
+<template name="metrics">
+  <div class="container-fluid edit_metrics">
+    {{#each metrics}}
+      <div class="row-fluid edit">
+        <div class="span8 offset1">
+          <input id="mixpanel_url_{{_id}}" data-objectid="{{_id}}" data-prop="mixpanel_url" class="span12 live-input" type="text" value="{{mixpanel_url}}" />
+        </div>
+        <div class="span2">
+          <a href="#" class="btn btn-small btn-warning removeMetric"><i class="icon-remove icon-white"></i> Delete</a>
+        </div>
+      </div>
+    {{/each}}
+    <div class="row-fluid">
+      <div class="span2 offset1"><a href="#" class="btn btn-small btn-inverse addMetric"><i class="icon-plus icon-white"></i> Add a metric</a></div>
+    </div>
+  </div>
 </template>
