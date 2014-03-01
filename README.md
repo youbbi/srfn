@@ -2,7 +2,7 @@
 
 #srfn - Data Monitoring Tool
 
-srfn is a Mixpanel data monitoring tool. The need emerged when we wanted to precisely monitor tracking events with a particular set of properties. No online dashboards offered the ability to filter on multiple properties.
+srfn is a Mixpanel data monitoring tool. The need emerged when we wanted to precisely monitor tracking events with a particular set of properties. No online dashboards offered the ability to filter the segmentation on multiple properties.
 
 ##Setup
 
