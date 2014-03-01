@@ -53,36 +53,30 @@ if (Meteor.isClient) {
   }
 
   Template.dashboard.metrics = function(){
-    return Metrics.find({});
+    return Metrics.find({ data: { $exists: true }, options: { $exists: true } });
   }
 
   Template.metric.options_string = function(){
-    var title = "";
-    if("undefined" != typeof this.options) {
-      title = this.options.event + " / " + this.options.where + " / " + this.options.type;
-    }
-    return title;
+    //use a whitelist for properties to display instead of fixed values
+    return this.options.event + " / " + this.options.where + " / " + this.options.type;
   }
 
   Template.metric.rendered = function(){
-
+    var _this = this;
     var json = this.data.data;
 
-    var parseDate = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
+    var parseDate  = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
+    var formatDate = d3.time.format("%Y-%m-%d %H:%M:%S");
     json.forEach(function(d) {
       d.date = parseDate(d.date);
     });
 
     var path = "#sparkline_"+this.data._id;
-    var h = $(path).height(),
-        w = $(path).width();
-    var max=0, min=0, len=0;
-
-
-    max = d3.max(json, function(o) { return d3.max([o.now, o.compare]); });
-
+    var h = $(path).height(), w = $(path).width();
+    var max=d3.max(json, function(o) { return d3.max([o.now, o.compare]); });
     var x = d3.time.scale().domain(d3.extent(json, function(d) { return d.date; })).range([0, w]);
     var y = d3.scale.linear().domain([0, max]).range([h, 0]);
+    var svg = d3.select(path).append("svg").attr("height", h).attr("width", w);
 
     var line = d3.svg.line()
       .x(function(d) { return x(d.date); })
@@ -92,8 +86,6 @@ if (Meteor.isClient) {
       .x(function(d) { return x(d.date); })
       .y0(h)
       .y1(function(d,i) { return y(d.compare); });
-
-    var svg = d3.select(path).append("svg").attr("height", h).attr("width", w);
 
     var now = svg.selectAll(".now")
         .data([json])
@@ -116,30 +108,49 @@ if (Meteor.isClient) {
 
 
 
-  // var now = svg.selectAll(".now")
-  //     .data(json.now)
-  //     .enter().append("g")
-  //     .attr("class", "now");
-
-  // now.append("path")
-  //     .attr("class", "line")
-  //     .attr("d", function(d) { return line(d.value); });
-
-    // var g = svg.append("svg:g").data(json.now)
-    //         .enter()
-    //         .append("svg:path")
-    //         .attr("d", function(d) {return line(d.value);})
-    //         .attr("class", "now");
-
-    // var g = svg.append("svg:g").data(json.compare)
-    //         .enter()
-    //         .append("svg:path")
-    //         .attr("d", function(d) {return area(d.value);})
-    //         .attr("class", "compare");
 
 
+    //line visibility cycling.
+    _this.cycle_counter = 0;
+
+    $(this.findAll('.sparkline')).each(function(i, elem){
+      $(elem).unbind("click").click(function(e){
+        _this.cycle_counter++;
+        var $p = $(e.target).closest(".sparkline");
+        var cycle_list = {"now":[true,true,false],"compare":[true,false,true]};
+        $p.find(".now").toggle(cycle_list.now[_this.cycle_counter % 3]);
+        $p.find(".compare").toggle(cycle_list.compare[_this.cycle_counter % 3]);
+      });
+    });
+
+
+
+
+
+
+    // var focus = svg.append("g")
+    //     .attr("class", "focus")
+    //     .style("display", "none");
+    //
+    //
+
+
+// svg.selectAll("circle")
+//     .data([json])
+//   .enter().append("circle")
+//     .attr("r", 5)
+//     .style("fill","none")
+//     .style("stroke","red")
+//     .style("pointer-events","all")
+//   .append("title")
+//     .text(function(d) { return "Date: " + d.date + " Value: " + d.now; });
+//
+//   svg.selectAll("circle")
+//       .attr("cx", function(d) { return d.date; })
+//       .attr("cy", function(d) { return d.now; });
 
   }
+
   Template.metrics.rendered = function() {
     var _this = this;
 
@@ -150,7 +161,9 @@ if (Meteor.isClient) {
             prop  = $(this).data("prop"),
             val   = e.target.value;
         o[prop]   = val;
-        Metrics.update({_id: id}, {$set: o});
+        Metrics.update({_id: id}, {$set: o}, function(err,res){
+          Meteor.call("parseOptions", id);
+        });
       });
     });
   }
@@ -165,11 +178,12 @@ if (Meteor.isClient) {
       if ($(e.target).hasClass("confirm")) {
         Metrics.remove({_id: this._id});
       } else {
-        $(e.target).addClass("confirm btn-red").removeClass("btn-default");
+        $(e.target).addClass("confirm btn-danger").removeClass("btn-warning");
         $(e.target).find("i").addClass("icon-question-sign").removeClass("icon-remove");
       }
     },
   });
+
 
   Template.dashboard.events({
     'click .refresh' : function(e) {
@@ -177,7 +191,6 @@ if (Meteor.isClient) {
       Meteor.call("fetchMetrics");
     }
   });
-
 }
 
 
@@ -207,7 +220,7 @@ if (Meteor.isServer) {
     mixpanel_exporter.segmentationSync = Meteor._wrapAsync(mixpanel_exporter.segmentation.bind(mixpanel_exporter));
 
     var basics = {
-      unit: "hour"
+      "unit": "hour"
     }
 
     var d = new Date();
@@ -222,6 +235,10 @@ if (Meteor.isServer) {
       to_date: new Date(d.setDate(d.getDate()-5)).yyyymmdd(),
       from_date: new Date(d.setDate(d.getDate()-2)).yyyymmdd()
     }
+
+    console.log(metric.options);
+    console.log(basics);
+    console.log(now);
 
     var result = mixpanel_exporter.segmentationSync(_.extend(metric.options, basics, now));
 
@@ -262,17 +279,22 @@ if (Meteor.isServer) {
     fetchMetrics : function(){
       var metrics = Metrics.find();
       metrics.forEach(function(metric){
-        if("undefined" != typeof metric.mixpanel_url) {
-          if("undefined" == typeof metric.options) {
-            var options;
-            if(options = extract_options(metric.mixpanel_url)){
-              Metrics.update({_id: metric._id}, {$set: {options: options}});
-            }
-          } else {
-            fetch_metric(metric);
-          }
+        if("undefined" != typeof metric.mixpanel_url && "undefined" != typeof metric.options) {
+          fetch_metric(metric);
         }
       });
+    },
+    parseOptions: function(id){
+      var metric  = Metrics.findOne({_id:id});
+      if(metric.mixpanel_url) {
+        var options = extract_options(metric.mixpanel_url)
+        if(!_.isEqual(options, metric.options)){
+          metric.options = options;
+          Metrics.update({_id: metric._id}, {$set: {options: options}}, function(err, res){
+            fetch_metric(metric);
+          });
+        }
+      }
     }
   });
 
