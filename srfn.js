@@ -66,7 +66,7 @@ if (Meteor.isClient) {
     var json = this.data.data;
 
     var parseDate  = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
-    var formatDate = d3.time.format("%Y-%m-%d %H:%M:%S");
+    var formatDate = d3.time.format("%b %d @ %I%p");
     json.forEach(function(d) {
       d.date = parseDate(d.date);
     });
@@ -105,11 +105,6 @@ if (Meteor.isClient) {
         .attr("class", "line")
         .attr("d", function(d) { return area(d); });
 
-
-
-
-
-
     //line visibility cycling.
     _this.cycle_counter = 0;
 
@@ -123,32 +118,47 @@ if (Meteor.isClient) {
       });
     });
 
+    //circles and text elements to show hover value
+    var focus1 = svg.append("g")
+        .attr("class", "focus")
+        .style("display", "none");
 
+    var focus2 = svg.append("g")
+        .attr("class", "focus")
+        .style("display", "none");
 
+    focus1.append("circle")
+        .attr("r", 2);
 
+    focus2.append("circle")
+        .attr("r", 2);
 
+    var linetip = svg.append("text")
+        .attr("x", 0)
+        .attr("dy", h-30)
+        .attr("alignment-baseline", "middle")
+        .attr("class", "linetip");
 
-    // var focus = svg.append("g")
-    //     .attr("class", "focus")
-    //     .style("display", "none");
-    //
-    //
+    svg.append("rect")
+        .attr("class", "overlay")
+        .attr("width", w)
+        .attr("height", h)
+        .on("mouseover", function() { focus1.style("display", null); focus2.style("display", null); linetip.style("display", null); })
+        .on("mouseout", function() { focus1.style("display", "none"); focus2.style("display", "none"); linetip.style("display", "none"); })
+        .on("mousemove", mousemove);
 
+    var bisectDate = d3.bisector(function(d) { return d.date; }).left;
 
-// svg.selectAll("circle")
-//     .data([json])
-//   .enter().append("circle")
-//     .attr("r", 5)
-//     .style("fill","none")
-//     .style("stroke","red")
-//     .style("pointer-events","all")
-//   .append("title")
-//     .text(function(d) { return "Date: " + d.date + " Value: " + d.now; });
-//
-//   svg.selectAll("circle")
-//       .attr("cx", function(d) { return d.date; })
-//       .attr("cy", function(d) { return d.now; });
-
+    function mousemove() {
+      var x0 = x.invert(d3.mouse(this)[0]),
+          i = bisectDate(json, x0, 1),
+          d0 = json[i - 1],
+          d1 = json[i],
+          d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+      focus1.attr("transform", "translate(" + x(d.date) + "," + y(d.now) + ")");
+      focus2.attr("transform", "translate(" + x(d.date) + "," + y(d.compare) + ")");
+      linetip.text(formatDate(d.date).toLowerCase() + " => now: " + d.now + " vs " + d.compare);
+    }
   }
 
   Template.metrics.rendered = function() {
@@ -184,8 +194,7 @@ if (Meteor.isClient) {
     },
   });
 
-
-  Template.dashboard.events({
+  Template.layout.events({
     'click .refresh' : function(e) {
       e.preventDefault();
       Meteor.call("fetchMetrics");
@@ -235,10 +244,6 @@ if (Meteor.isServer) {
       to_date: new Date(d.setDate(d.getDate()-5)).yyyymmdd(),
       from_date: new Date(d.setDate(d.getDate()-2)).yyyymmdd()
     }
-
-    console.log(metric.options);
-    console.log(basics);
-    console.log(now);
 
     var result = mixpanel_exporter.segmentationSync(_.extend(metric.options, basics, now));
 

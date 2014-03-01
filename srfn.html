@@ -3,7 +3,7 @@
   <style>
     .now path {
       stroke-width: 1;
-      stroke: rgba(100, 140, 180, 1);
+      stroke: rgba(100, 140, 180, 0.5);
       fill: none;
     }
     .compare path {
@@ -65,6 +65,20 @@
     .nav {
       padding-right: 5px;
     }
+    .overlay {
+      fill: none;
+      pointer-events: all;
+    }
+
+    .focus circle {
+      fill: rgba(100, 140, 180, 0.8);
+      stroke: none;
+    }
+    .linetip {
+      fill: black;
+      font-size:11px;
+    }
+
   </style>
 </head>
 
@@ -79,7 +93,6 @@
     </div>
     {{yield}}
   </div>
-  <script src="/js/app.js" type="text/javascript"></script>
 </template>
 
 <template name="dashboard">
