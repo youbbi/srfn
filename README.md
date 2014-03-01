@@ -25,6 +25,14 @@ If you don't want to commit the changes to the settings.json file, tell GIT to i
 git update-index --assume-unchanged settings.json
 ```
 
+##Using srfn
+
+Log in to Mixpanel, go to the segmentation section and build a query you'd like to monitor. Open the developper tools and grab the URL being queried by Mixpanel. Paste this URL into a new field in the edit section of srfn. It will look like this:
+
+```
+https://mixpanel.com/api/2.0/segmentation?event=event_name&type=general&where=%22something%22+in+properties%5B%22somewhere%22%5D&to_date=2014-02-26&from_date=2014-01-28&unit=day&api_key=aaa&expire=1393480202&sig=bbb
+```
+
 ##Deploying to Heroku
 
 Mixpanel API key and secret need to be added as a ```METEOR_SETTINGS``` environment variable:
