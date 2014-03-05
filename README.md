@@ -3,7 +3,7 @@
 
 #srfn - Data Monitoring Tool
 
-srfn is a Mixpanel data monitoring tool. The need emerged when we wanted to precisely monitor tracking events with a particular set of properties. No online dashboards offered the ability to filter the segmentation on multiple properties.
+srfn is a Mixpanel data monitoring tool. The need emerged when we wanted to precisely monitor tracking events with a particular set of properties. No online dashboards offered the ability to filter segmentation on multiple properties.
 
 ##Setup
 
@@ -14,6 +14,7 @@ Install [Meteor](http://meteor.com) and [Meteorite](https://github.com/oortcloud
 Clone this project, cd into it, modify ```settings.json``` with your Mixpanel API key and secret and then:
 
 ``` sh
+$ meteor update
 $ mrt run --settings settings.json
 ```
 
@@ -42,7 +43,7 @@ Mixpanel API key and secret need to be added as a ```METEOR_SETTINGS``` environm
 
 ``` sh
 $ heroku create --stack cedar --buildpack https://github.com/oortcloud/heroku-buildpack-meteorite.git
-$ heroku config:add METEOR_SETTINGS='{"mixpanel_settings" : {"key": "AAA","secret": "BBB"}, "prod": true}'
+$ heroku config:add METEOR_SETTINGS="`cat settings.json`"
 $ heroku config:add ROOT_URL=http://your.domain.com
 $ heroku labs:enable websockets
 $ git push heroku master
@@ -59,5 +60,5 @@ $ mongod --smallfiles --noprealloc --nojournal
 in another window:
 
 ``` sh
-$ laika
+$ laika -s settings.json
 ```
