@@ -15,17 +15,7 @@ Router.map(function () {
   });
 });
 
-function extract_options(mixpanel_url){
-  exploded_url = Npm.require('url').parse(mixpanel_url, true);
-  if (exploded_url.pathname != '/api/2.0/segmentation' || exploded_url.hostname != "mixpanel.com") {
-    return false;
-  } else {
-    return _.omit(exploded_url.query, ["to_date", "from_date", "unit", "api_key", "expire", "sig"]);
-  }
-}
-
 if (Meteor.isClient) {
-  Meteor.startup(function(){});
 
   Handlebars.registerHelper('spanSplit', function(collection, options) {
     var out = '<div class="row-fluid">';
@@ -49,16 +39,16 @@ if (Meteor.isClient) {
 
   Template.metrics.metrics = function(){
     return Metrics.find({});
-  }
+  };
 
   Template.dashboard.metrics = function(){
     return Metrics.find({ data: { $exists: true }, options: { $exists: true } });
-  }
+  };
 
   Template.metric.options_string = function(){
     //use a whitelist for properties to display instead of fixed values
     return this.options.event + " / " + this.options.where + " / " + this.options.type;
-  }
+  };
 
   Template.metric.rendered = function(){
     var _this = this;
@@ -158,7 +148,7 @@ if (Meteor.isClient) {
       focus2.attr("transform", "translate(" + x(d.date) + "," + y(d.compare) + ")");
       linetip.text(formatDate(d.date).toLowerCase() + " => now: " + d.now + " vs " + d.compare);
     }
-  }
+  };
 
   Template.metrics.rendered = function() {
     var _this = this;
@@ -175,7 +165,7 @@ if (Meteor.isClient) {
         });
       });
     });
-  }
+  };
 
   Template.metrics.events({
     'click .addMetric' : function(e) {
@@ -192,51 +182,48 @@ if (Meteor.isClient) {
       }
     },
   });
-
-  Template.layout.events({
-    'click .refresh' : function(e) {
-      e.preventDefault();
-      Meteor.call("fetchMetrics");
-    }
-  });
 }
-
-
 
 if (Meteor.isServer) {
 
+  var extract_options = function(mixpanel_url){
+    exploded_url = Npm.require('url').parse(mixpanel_url, true);
+    if (exploded_url.pathname != '/api/2.0/segmentation' || exploded_url.hostname != "mixpanel.com") {
+      return false;
+    } else {
+      return _.omit(exploded_url.query, ["to_date", "from_date", "unit", "api_key", "expire", "sig"]);
+    }
+  };
+
   var fetch_metrics_data = function () {
     Meteor.call("fetchMetrics");
-  }
+  };
 
   var fetch_metric = function(metric){
-
-
-    var Mixpanel_Exporter = Meteor.require('node-mixpanel-data-exporter')
+    var Mixpanel_Exporter = Meteor.require('node-mixpanel-data-exporter');
     var mixpanel_exporter = new Mixpanel_Exporter({
       api_key: Meteor.settings.mixpanel_settings.key,
       api_secret: Meteor.settings.mixpanel_settings.secret
     });
+    var result, basics, now, compare;
+    var data = [], data2 = [];
 
-    mixpanel_exporter.segmentationSync = Meteor._wrapAsync(mixpanel_exporter.segmentation.bind(mixpanel_exporter));
-
-    var basics = {
+    basics = {
       "unit": "hour"
-    }
+    };
 
-    var now = {
+    now = {
       to_date: moment().format("YYYY-MM-DD"),
       from_date: moment().subtract("days",2).format("YYYY-MM-DD")
-    }
+    };
 
-    var compare = {
+    compare = {
       to_date: moment().subtract("days",7).format("YYYY-MM-DD"),
       from_date: moment().subtract("days",9).format("YYYY-MM-DD")
-    }
+    };
 
-    var result = mixpanel_exporter.segmentationSync(_.extend(metric.options, basics, now));
-
-    var data = [], data2 = [];
+    mixpanel_exporter.segmentationSync = Meteor._wrapAsync(mixpanel_exporter.segmentation.bind(mixpanel_exporter));
+    result = mixpanel_exporter.segmentationSync(_.extend(metric.options, basics, now));
 
     res = JSON.parse(result.body);
     _.each(res.data.values, function(value, key){
@@ -249,7 +236,7 @@ if (Meteor.isServer) {
         return datum.date;
     });
 
-    var result = mixpanel_exporter.segmentationSync(_.extend(metric.options, basics, compare));
+    result = mixpanel_exporter.segmentationSync(_.extend(metric.options, basics, compare));
 
     res = JSON.parse(result.body);
     _.each(res.data.values, function(value, key){
@@ -267,7 +254,7 @@ if (Meteor.isServer) {
     });
 
     Metrics.update({_id:metric._id}, {$set: {data: data}});
-  }
+  };
 
   Meteor.methods({
     fetchMetrics : function(){
@@ -281,7 +268,7 @@ if (Meteor.isServer) {
     parseOptions: function(id){
       var metric  = Metrics.findOne({_id:id});
       if(metric.mixpanel_url) {
-        var options = extract_options(metric.mixpanel_url)
+        var options = extract_options(metric.mixpanel_url);
         if(!_.isEqual(options, metric.options)){
           metric.options = options;
           Metrics.update({_id: metric._id}, {$set: {options: options}}, function(err, res){
@@ -292,9 +279,7 @@ if (Meteor.isServer) {
     }
   });
 
-
   Meteor.startup(function () {
-    Meteor.setInterval(fetch_metrics_data, 30 * 60 * 1000);
-    // fetch_metrics_data();
+    Meteor.setInterval(fetch_metrics_data, 2 * 60 * 1000);
   });
 }

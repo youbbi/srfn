@@ -38,7 +38,11 @@ https://mixpanel.com/api/2.0/segmentation?event=event_name&type=general&where=%2
 Mixpanel API key and secret need to be added as a ```METEOR_SETTINGS``` environment variable:
 
 ``` sh
-heroku config:add METEOR_SETTINGS='{"mixpanel_settings" : {"key": "AAA","secret": "BBB"}}'
+$ heroku create --stack cedar --buildpack https://github.com/oortcloud/heroku-buildpack-meteorite.git
+$ heroku config:add METEOR_SETTINGS='{"mixpanel_settings" : {"key": "AAA","secret": "BBB"}}'
+$ heroku config:add ROOT_URL=http://your.domain.com
+$ heroku labs:enable websockets
+$ git push heroku master
 ```
 
 ##Tests

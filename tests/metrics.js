@@ -40,12 +40,12 @@ suite('Metrics', function() {
         added: addedNewEvent
       });
 
-      function addedNewEvent(event) {
-        emit('event', event);
+      function addedNewEvent(metric) {
+        emit('metric', metric);
       }
       emit('done');
-    }).once('event', function(event) {
-      assert.equal(event.mixpanel_url, 'https://mixpanel.com/c2');
+    }).once('metric', function(metric) {
+      assert.equal(metric.mixpanel_url, 'https://mixpanel.com/c2');
       done();
     }).once('done', function() {
       c2.eval(insertEvent);
