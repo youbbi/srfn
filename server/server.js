@@ -14,7 +14,6 @@ Metrics.allow({
 
 Metrics.deny({
   insert: function (userId, doc) {
-    console.log(Meteor.settings.prod);
     return !Meteor.settings.prod;
   },
   update: function (userId, doc, fields, modifier) {
@@ -35,8 +34,13 @@ var extract_options = function(mixpanel_url){
   }
 };
 
-var fetch_metrics_data = function () {
-  Meteor.call("fetchMetrics");
+var fetch_metrics =  function(){
+  var metrics = Metrics.find();
+  metrics.forEach(function(metric){
+    if("undefined" != typeof metric.mixpanel_url && "undefined" != typeof metric.options) {
+      fetch_metric(metric);
+    }
+  });
 };
 
 var fetch_metric = function(metric){
@@ -97,28 +101,23 @@ var fetch_metric = function(metric){
 };
 
 Meteor.methods({
-  fetchMetrics : function(){
-    var metrics = Metrics.find();
-    metrics.forEach(function(metric){
-      if("undefined" != typeof metric.mixpanel_url && "undefined" != typeof metric.options) {
-        fetch_metric(metric);
-      }
-    });
-  },
   parseOptions: function(id){
-    var metric  = Metrics.findOne({_id:id});
-    if(metric.mixpanel_url) {
-      var options = extract_options(metric.mixpanel_url);
-      if(!_.isEqual(options, metric.options)){
-        metric.options = options;
-        Metrics.update({_id: metric._id}, {$set: {options: options}}, function(err, res){
-          fetch_metric(metric);
-        });
+    if(!!Meteor.settings.prod){
+      console.log("ok");
+      var metric  = Metrics.findOne({_id:id});
+      if(metric.mixpanel_url) {
+        var options = extract_options(metric.mixpanel_url);
+        if(!_.isEqual(options, metric.options)){
+          metric.options = options;
+          Metrics.update({_id: metric._id}, {$set: {options: options}}, function(err, res){
+            fetch_metric(metric);
+          });
+        }
       }
     }
   }
 });
 
 Meteor.startup(function () {
-  Meteor.setInterval(fetch_metrics_data, 2 * 60 * 1000);
+  Meteor.setInterval(fetch_metrics, 2 * 60 * 1000);
 });
