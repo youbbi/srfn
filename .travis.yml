@@ -7,11 +7,3 @@ services:
 - mongodb
 env:
 - LAIKA_OPTIONS="-t 5000"
-deploy:
-  provider: heroku
-  api_key:
-    secure: LICvW0ulFjHTRN6ytaoBGU8CmiStp9UusRmOZ/USTN31SA2NXIjVD04J4BrrLVVYqQOzlgZ9w9hb56SKZgDtNGOqpM29x01hXHO5m1bIij9dL/ptnhIBs1Mce36ufi+JMAbVyky8LeIeuv+hkN+zUik8rrl117GphxmGJ8fugfM=
-  app: vast-spire-3012
-  strategy: git
-  on:
-    repo: errows/srfn
