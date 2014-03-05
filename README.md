@@ -17,6 +17,9 @@ Clone this project, cd into it, modify ```settings.json``` with your Mixpanel AP
 $ mrt run --settings settings.json
 ```
 
+###Note
+To enable demo mode, remove the ```"prod":true``` setting and writes will be denied.
+
 ###Tip
 
 If you don't want to commit the changes to the settings.json file, tell GIT to ignore the changes:
@@ -39,7 +42,7 @@ Mixpanel API key and secret need to be added as a ```METEOR_SETTINGS``` environm
 
 ``` sh
 $ heroku create --stack cedar --buildpack https://github.com/oortcloud/heroku-buildpack-meteorite.git
-$ heroku config:add METEOR_SETTINGS='{"mixpanel_settings" : {"key": "AAA","secret": "BBB"}}'
+$ heroku config:add METEOR_SETTINGS='{"mixpanel_settings" : {"key": "AAA","secret": "BBB"}, "prod": true}'
 $ heroku config:add ROOT_URL=http://your.domain.com
 $ heroku labs:enable websockets
 $ git push heroku master

@@ -2,5 +2,6 @@
   "mixpanel_settings" : {
     "key": "AAA",
     "secret": "BBB"
-  }
+  },
+  "prod": true
 }
