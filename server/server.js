@@ -90,7 +90,6 @@ var fetch_metric = function(metric){
 Meteor.methods({
   parseOptions: function(id){
     if(!!Meteor.settings.prod){
-      console.log("ok");
       var metric  = Metrics.findOne({_id:id});
       if(metric.mixpanel_url) {
         var options = extract_options(metric.mixpanel_url);
