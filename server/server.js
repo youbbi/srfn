@@ -2,28 +2,15 @@ Metrics = new Meteor.Collection('metric');
 
 Metrics.allow({
   insert: function (userId, doc) {
-    return true;
+    return Meteor.settings.prod;
   },
   update: function (userId, doc, fields, modifier) {
-    return true;
+    return Meteor.settings.prod;
   },
   remove: function (userId, doc) {
-    return true;
+    return Meteor.settings.prod;
   }
 });
-
-Metrics.deny({
-  insert: function (userId, doc) {
-    return !Meteor.settings.prod;
-  },
-  update: function (userId, doc, fields, modifier) {
-    return !Meteor.settings.prod;
-  },
-  remove: function (userId, doc) {
-    return !Meteor.settings.prod;
-  }
-});
-
 
 var extract_options = function(mixpanel_url){
   exploded_url = Npm.require('url').parse(mixpanel_url, true);
