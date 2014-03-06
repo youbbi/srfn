@@ -1,33 +1,24 @@
 Metrics = new Meteor.Collection('metric');
 
 Metrics.allow({
-  insert: function (userId, doc) {
+  insert: function () {
     return Meteor.settings.prod;
   },
-  update: function (userId, doc, fields, modifier) {
+  update: function () {
     return Meteor.settings.prod;
   },
-  remove: function (userId, doc) {
+  remove: function () {
     return Meteor.settings.prod;
   }
 });
 
 var extract_options = function(mixpanel_url){
-  exploded_url = Npm.require('url').parse(mixpanel_url, true);
-  if (exploded_url.pathname != '/api/2.0/segmentation' || exploded_url.hostname != "mixpanel.com") {
+  var exploded_url = Npm.require('url').parse(mixpanel_url, true);
+  if (exploded_url.pathname !== '/api/2.0/segmentation' || exploded_url.hostname !== "mixpanel.com") {
     return false;
   } else {
     return _.omit(exploded_url.query, ["to_date", "from_date", "unit", "api_key", "expire", "sig"]);
   }
-};
-
-var fetch_metrics =  function(){
-  var metrics = Metrics.find();
-  metrics.forEach(function(metric){
-    if("undefined" != typeof metric.mixpanel_url && "undefined" != typeof metric.options) {
-      fetch_metric(metric);
-    }
-  });
 };
 
 var fetch_metric = function(metric){
@@ -36,7 +27,7 @@ var fetch_metric = function(metric){
     api_key: Meteor.settings.mixpanel_settings.key,
     api_secret: Meteor.settings.mixpanel_settings.secret
   });
-  var result, basics, now, compare;
+  var result, res, basics, now, compare;
   var data = [], data2 = [];
 
   basics = {
@@ -85,6 +76,15 @@ var fetch_metric = function(metric){
   });
 
   Metrics.update({_id:metric._id}, {$set: {data: data}});
+};
+
+var fetch_metrics =  function(){
+  var metrics = Metrics.find();
+  metrics.forEach(function(metric){
+    if("undefined" !== typeof metric.mixpanel_url && "undefined" !== typeof metric.options) {
+      fetch_metric(metric);
+    }
+  });
 };
 
 Meteor.methods({

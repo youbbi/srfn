@@ -25,7 +25,7 @@ Handlebars.registerHelper('spanSplit', function(collection, options) {
       return options.fn(item, {  });
     });
     count += 1;
-    if (count == 3) {
+    if (count === 3) {
       out += '</div><div class="row-fluid">';
       count = 0;
     }
@@ -72,7 +72,7 @@ Template.metric.rendered = function(){
   var area = d3.svg.area()
     .x(function(d) { return x(d.date); })
     .y0(h)
-    .y1(function(d,i) { return y(d.compare); });
+    .y1(function(d) { return y(d.compare); });
 
   var now = svg.selectAll(".now")
       .data([json])
@@ -149,8 +149,6 @@ Template.metric.rendered = function(){
 };
 
 Template.metrics.rendered = function() {
-  var _this = this;
-
   $(this.findAll('.live-input')).each(function(i, elem){
     $(elem).unbind("keyup").keyup(function(e){
       var o     = {},
@@ -158,7 +156,7 @@ Template.metrics.rendered = function() {
           prop  = $(this).data("prop"),
           val   = e.target.value;
       o[prop]   = val;
-      Metrics.update({_id: id}, {$set: o}, function(err,res){
+      Metrics.update({_id: id}, {$set: o}, function(){
         Meteor.call("parseOptions", id);
       });
     });
