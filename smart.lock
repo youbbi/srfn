@@ -4,7 +4,8 @@
     "basePackages": {
       "iron-router": {},
       "moment": {},
-      "npm": {}
+      "npm": {},
+      "percolatestudio-mixpanel": {}
     },
     "packages": {
       "iron-router": {
@@ -21,6 +22,11 @@
         "git": "https://github.com/arunoda/meteor-npm.git",
         "tag": "v0.2.6",
         "commit": "177ab6118de5bf8cffb19481343d5762ff7a2aaf"
+      },
+      "percolatestudio-mixpanel": {
+        "git": "https://github.com/percolatestudio/meteor-mixpanel.git",
+        "tag": "v0.5.0",
+        "commit": "d92c8fd6c0504d3f1c195cf972354ab2e81b4e20"
       }
     }
   }

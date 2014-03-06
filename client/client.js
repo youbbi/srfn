@@ -161,20 +161,52 @@ Template.metrics.rendered = function() {
       });
     });
   });
+  mixpanel.track("Loaded view/crud-metrics");
+};
+
+Template.dashboard.rendered = function(){
+  mixpanel.track("Loaded view/dashboard");
 };
 
 Template.metrics.events({
   'click .addMetric' : function(e) {
     e.preventDefault();
     Metrics.insert({});
+    mixpanel.track("Clicked crud-metrics/create");
   },
   'click .removeMetric': function(e){
     e.preventDefault();
     if ($(e.target).hasClass("confirm")) {
       Metrics.remove({_id: this._id});
+      mixpanel.track("Clicked crud-metrics/delete");
     } else {
       $(e.target).addClass("confirm btn-danger").removeClass("btn-warning");
       $(e.target).find("i").addClass("icon-question-sign").removeClass("icon-remove");
     }
   },
+});
+
+Template.layout.events({
+  'click .home' : function(e) {
+    e.preventDefault();
+    mixpanel.track("Clicked nav/dashboard");
+    Router.go('/');
+  },
+  'click .crud-metrics': function(e){
+    e.preventDefault();
+    mixpanel.track("Clicked nav/crud-metrics");
+    Router.go('/metrics');
+  },
+});
+
+Meteor.startup(function(){
+  var token;
+  //FUGLY
+  if(!_.isObject(Meteor.settings) || !_.isObject(Meteor.settings.public) || !_.isObject(Meteor.settings.public.mixpanel_settings) || typeof Meteor.settings.public.mixpanel_settings.token == "undefined") {
+    token = "6cc00cb7f5e23bfa467fe322a0dfda7b";
+  } else {
+    token = Meteor.settings.public.mixpanel_settings.token;
+  }
+
+  mixpanel.init(token);
 });

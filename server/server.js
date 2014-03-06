@@ -2,13 +2,13 @@ Metrics = new Meteor.Collection('metric');
 
 Metrics.allow({
   insert: function () {
-    return Meteor.settings.prod;
+    return !Meteor.settings.demo;
   },
   update: function () {
-    return Meteor.settings.prod;
+    return !Meteor.settings.demo;
   },
   remove: function () {
-    return Meteor.settings.prod;
+    return !Meteor.settings.demo;
   }
 });
 
@@ -89,7 +89,7 @@ var fetch_metrics =  function(){
 
 Meteor.methods({
   parseOptions: function(id){
-    if(!!Meteor.settings.prod){
+    if(!Meteor.settings.demo){
       var metric  = Metrics.findOne({_id:id});
       if(metric.mixpanel_url) {
         var options = extract_options(metric.mixpanel_url);

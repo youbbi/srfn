@@ -2,6 +2,7 @@
   "packages": {
     "iron-router": {},
     "moment": {},
-    "npm": {}
+    "npm": {},
+    "percolatestudio-mixpanel": {}
   }
 }

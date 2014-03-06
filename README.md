@@ -19,15 +19,7 @@ $ mrt run --settings settings.json
 ```
 
 ###Note
-To enable demo mode, remove the ```"prod":true``` setting and writes will be denied.
-
-###Tip
-
-If you don't want to commit the changes to the settings.json file, tell GIT to ignore the changes:
-
-``` sh
-git update-index --assume-unchanged settings.json
-```
+To enable demo mode, add a root ```"demo":true``` setting and writes will be denied.
 
 ##Using srfn
 
