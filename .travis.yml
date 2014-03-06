@@ -1,13 +1,13 @@
 language: node_js
 node_js:
-  - '0.10'
+- '0.10'
 before_install:
-  - curl -L http://git.io/3l-rRA | /bin/sh
+- curl -L http://git.io/3l-rRA | /bin/sh
 services:
-  - mongodb
+- mongodb
 env:
-  - LAIKA_OPTIONS="-t 5000"
+- LAIKA_OPTIONS="-t 5000"
 # prod
-  -secure: qiosci0m4VPuAwENVFcq88QZ7jFzGBDRj+WzoINMWc+hgNSfqWwkUvkLjAO5YF6AIcbrVKx+Gkjw66vN9tsDg3I3lDzZhZ3LjC6j52uqaCjQx+xkMy+Yhvxj9lRvyqNXRv0EOdQRJuAQVBCW9sIsh4nInOeLIBm5Ip5N/2v5UVo=
+-secure: qiosci0m4VPuAwENVFcq88QZ7jFzGBDRj+WzoINMWc+hgNSfqWwkUvkLjAO5YF6AIcbrVKx+Gkjw66vN9tsDg3I3lDzZhZ3LjC6j52uqaCjQx+xkMy+Yhvxj9lRvyqNXRv0EOdQRJuAQVBCW9sIsh4nInOeLIBm5Ip5N/2v5UVo=
 # mixpanel_settings
-  -secure: cKzTeJ3/3IBgxfklMnkxX+H+yY0sAdeEG0cV/IzsjBVH1lKdZb0Ako0NnbcUZ7hmCMnk0dNEZFdisTPY/67rmF9ayaX4B4dEgCnSadArdqOC08+uwpZcarLJyUEjOWYuexfmXdqwHxktywWrcnsQv1sBNAtkjoTeEzlME3hIaNY=
+-secure: cKzTeJ3/3IBgxfklMnkxX+H+yY0sAdeEG0cV/IzsjBVH1lKdZb0Ako0NnbcUZ7hmCMnk0dNEZFdisTPY/67rmF9ayaX4B4dEgCnSadArdqOC08+uwpZcarLJyUEjOWYuexfmXdqwHxktywWrcnsQv1sBNAtkjoTeEzlME3hIaNY=
