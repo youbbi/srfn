@@ -72,7 +72,7 @@ var fetch_metric = function(metric){
   });
 
   _.each(data, function(val, i) {
-    val.compare = data2[i].compare;
+    val.compare = _.isObject(data2[i]) ? data2[i].compare : 0;
   });
 
   Metrics.update({_id:metric._id}, {$set: {data: data}});
