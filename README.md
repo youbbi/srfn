@@ -5,6 +5,8 @@
 
 srfn is a Mixpanel data monitoring tool. The need emerged when we wanted to precisely monitor tracking events with a particular set of properties. No online dashboards offered the ability to filter segmentation on multiple properties.
 
+[Live Demo](http://srfn.io) - Locked (adding/changing metrics is disabled)
+
 ##Setup
 
 Install [Meteor](http://meteor.com) and [Meteorite](https://github.com/oortcloud/meteorite)
