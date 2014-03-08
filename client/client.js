@@ -50,8 +50,7 @@ Template.dashboard.metrics = function(){
 };
 
 Template.metric.options_string = function(){
-  //use a whitelist for properties to display instead of fixed values
-  return this.options.event + " / " + this.options.where + " / " + this.options.type;
+  return _.values(_.pick(this.options, ["event", "type", "where"])).join(" / ");
 };
 
 Template.metric.rendered = function(){
@@ -108,6 +107,7 @@ Template.metric.rendered = function(){
       var cycle_list = {"now":[true,true,false],"compare":[true,false,true]};
       $p.find(".now").toggle(cycle_list.now[_this.cycle_counter % 3]);
       $p.find(".compare").toggle(cycle_list.compare[_this.cycle_counter % 3]);
+      mixpanel.track("Clicked sparkline", {"count":_this.cycle_counter});
     });
   });
 
