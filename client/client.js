@@ -7,11 +7,17 @@ Router.configure({
 Router.map(function () {
   this.route('dashboard', {
     path: '/',
-    template: 'dashboard'
+    template: 'dashboard',
+    after: function () {
+      mixpanel.track("Loaded view/dashboard");
+    }
   });
 
   this.route('metrics', {
-    path: '/metrics'
+    path: '/metrics',
+    after: function () {
+      mixpanel.track("Loaded view/crud-metrics");
+    }
   });
 });
 
@@ -161,11 +167,6 @@ Template.metrics.rendered = function() {
       });
     });
   });
-  mixpanel.track("Loaded view/crud-metrics");
-};
-
-Template.dashboard.rendered = function(){
-  mixpanel.track("Loaded view/dashboard");
 };
 
 Template.metrics.events({
