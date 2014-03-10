@@ -21,6 +21,22 @@ var extract_options = function(mixpanel_url){
   }
 };
 
+var clean_url = function(mixpanel_url){
+  var o = Npm.require('url').parse(mixpanel_url, true);
+  if (o.pathname !== '/api/2.0/segmentation' || o.hostname !== "mixpanel.com") {
+    return false;
+  } else {
+    o.query = _.omit(o.query, ["to_date", "from_date", "unit", "api_key", "expire", "sig"]);
+    delete o.search;
+    delete o.path;
+    delete o.href;
+    var url =  Npm.require('url').format(o);
+    console.log(url);
+    return url;
+  }
+};
+
+
 var fetch_metric = function(metric){
   var Mixpanel_Exporter = Meteor.require('node-mixpanel-data-exporter');
   var mixpanel_exporter = new Mixpanel_Exporter({
@@ -94,8 +110,10 @@ Meteor.methods({
       if(metric.mixpanel_url) {
         var options = extract_options(metric.mixpanel_url);
         if(!_.isEqual(options, metric.options)){
+          var clean = clean_url(metric.mixpanel_url);
           metric.options = options;
-          Metrics.update({_id: metric._id}, {$set: {options: options}}, function(err, res){
+          metric.mixpanel_url = clean;
+          Metrics.update({_id: metric._id}, {$set: {options: options, mixpanel_url: clean}}, function(err, res){
             fetch_metric(metric);
           });
         }

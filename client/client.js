@@ -21,6 +21,15 @@ Router.map(function () {
   });
 });
 
+
+var delay = (function(){
+  var timer = 0;
+  return function(callback, ms){
+    clearTimeout (timer);
+    timer = setTimeout(callback, ms);
+  };
+})();
+
 Handlebars.registerHelper('spanSplit', function(collection, options) {
   var out = '<div class="row-fluid">';
   var count = 0;
@@ -42,11 +51,11 @@ Handlebars.registerHelper('spanSplit', function(collection, options) {
 });
 
 Template.metrics.metrics = function(){
-  return Metrics.find({});
+  return Metrics.find({}, {sort: {position:1}});
 };
 
 Template.dashboard.metrics = function(){
-  return Metrics.find({ data: { $exists: true }, options: { $exists: true } });
+  return Metrics.find({ data: { $exists: true }, options: { $exists: true } }, {sort: {position:1}});
 };
 
 Template.metric.options_string = function(){
@@ -154,25 +163,24 @@ Template.metric.rendered = function(){
   }
 };
 
-Template.metrics.rendered = function() {
-  $(this.findAll('.live-input')).each(function(i, elem){
-    $(elem).unbind("keyup").keyup(function(e){
+Template.metrics.events({
+  'keyup .live-input' : function(e){
+    delay(function(self){
       var o     = {},
-          id    = $(this).data("objectid"),
-          prop  = $(this).data("prop"),
-          val   = e.target.value;
+          id    = $(e.target).data("objectid"),
+          prop  = $(e.target).data("prop"),
+          val = e.target.value;
+          //parse float to fix sorting as string (10 would come before 2)
+        if(prop == "position") { val = parseFloat(val) ;}
       o[prop]   = val;
       Metrics.update({_id: id}, {$set: o}, function(){
         Meteor.call("parseOptions", id);
       });
-    });
-  });
-};
-
-Template.metrics.events({
+    }, 500);
+  },
   'click .addMetric' : function(e) {
     e.preventDefault();
-    Metrics.insert({});
+    Metrics.insert({position:Metrics.findOne({}, {sort: {position:-1}}).position+1});
     mixpanel.track("Clicked crud-metrics/create");
   },
   'click .removeMetric': function(e){
@@ -210,4 +218,5 @@ Meteor.startup(function(){
   }
 
   mixpanel.init(token);
+
 });
