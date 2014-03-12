@@ -1,5 +1,3 @@
-Metrics = new Meteor.Collection('metric');
-
 Router.configure({
   layoutTemplate: 'layout'
 });
@@ -20,7 +18,6 @@ Router.map(function () {
     }
   });
 });
-
 
 var delay = (function(){
   var timer = 0;
