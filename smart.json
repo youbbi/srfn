@@ -3,6 +3,9 @@
     "iron-router": {},
     "moment": {},
     "npm": {},
-    "percolatestudio-mixpanel": {}
+    "percolatestudio-mixpanel": {},
+    "meteor-newrelic": {
+      "git": "https://github.com/deepwell/meteor-newrelic.git"
+    }
   }
 }

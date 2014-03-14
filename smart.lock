@@ -5,7 +5,11 @@
       "iron-router": {},
       "moment": {},
       "npm": {},
-      "percolatestudio-mixpanel": {}
+      "percolatestudio-mixpanel": {},
+      "meteor-newrelic": {
+        "git": "https://github.com/deepwell/meteor-newrelic.git",
+        "branch": "master"
+      }
     },
     "packages": {
       "iron-router": {
@@ -27,6 +31,11 @@
         "git": "https://github.com/percolatestudio/meteor-mixpanel.git",
         "tag": "v0.5.0",
         "commit": "d92c8fd6c0504d3f1c195cf972354ab2e81b4e20"
+      },
+      "meteor-newrelic": {
+        "git": "https://github.com/deepwell/meteor-newrelic.git",
+        "branch": "master",
+        "commit": "e1e087cd2531371c9450f6e3a079a05f6d3dc5c4"
       }
     }
   }

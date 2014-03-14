@@ -14,3 +14,4 @@ iron-router
 less
 moment
 percolatestudio-mixpanel
+meteor-newrelic
