@@ -156,7 +156,10 @@ Template.metric.rendered = function(){
         d = x0 - d0.date > d1.date - x0 ? d1 : d0;
     focus1.attr("transform", "translate(" + x(d.date) + "," + y(d.now) + ")");
     focus2.attr("transform", "translate(" + x(d.date) + "," + y(d.compare) + ")");
-    linetip.text(formatDate(d.date).toLowerCase() + " => now: " + d.now + " vs " + d.compare);
+    var percentChange = (d.now && d.compare != 0) ? Math.round(100*(d.now - d.compare)/d.compare) : 'N/A';
+
+    (percentChange < -10) ? linetip.style('fill', 'red') : linetip.style('fill', 'black');
+    linetip.text(formatDate(d.date).toLowerCase() + " => now: " + d.now + " vs " + d.compare + ' (' + percentChange + '%)'  );
   }
 };
 
