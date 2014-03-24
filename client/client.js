@@ -177,7 +177,11 @@ Template.metrics.events({
   },
   'click .addMetric' : function(e) {
     e.preventDefault();
-    Metrics.insert({position:Metrics.findOne({}, {sort: {position:-1}}).position+1});
+    var metric = Metrics.findOne({}, {sort: {position:-1}});
+    var position = (metric && metric.position + 1) || 0;
+
+    Metrics.insert({position: position});
+
     mixpanel.track("Clicked crud-metrics/create");
   },
   'click .removeMetric': function(e){
