@@ -27,25 +27,25 @@ var delay = (function(){
   };
 })();
 
-Handlebars.registerHelper('spanSplit', function(collection, options) {
-  var out = '<div class="row-fluid">';
-  var count = 0;
+// UI.registerHelper('spanSplit', function(collection, options) {
+//   var out = '<div class="row-fluid">';
+//   var count = 0;
 
-  collection.forEach(function (item) {
+//   this.collection.forEach(function (item) {
 
-    out += Spark.labelBranch(Spark.UNIQUE_LABEL, function(){
-      return options.fn(item, {  });
-    });
-    count += 1;
-    if (count === 3) {
-      out += '</div><div class="row-fluid">';
-      count = 0;
-    }
-  });
+//     out += Spark.labelBranch(Spark.UNIQUE_LABEL, function(){
+//       return options.fn(item, {  });
+//     });
+//     count += 1;
+//     if (count === 3) {
+//       out += '</div><div class="row-fluid">';
+//       count = 0;
+//     }
+//   });
 
-  out += "</div>";
-  return out;
-});
+//   out += "</div>";
+//   return out;
+// });
 
 Template.metrics.metrics = function(){
   return Metrics.find({}, {sort: {position:1}});
@@ -156,7 +156,10 @@ Template.metric.rendered = function(){
         d = x0 - d0.date > d1.date - x0 ? d1 : d0;
     focus1.attr("transform", "translate(" + x(d.date) + "," + y(d.now) + ")");
     focus2.attr("transform", "translate(" + x(d.date) + "," + y(d.compare) + ")");
-    linetip.text(formatDate(d.date).toLowerCase() + " => now: " + d.now + " vs " + d.compare);
+    var percentChange = (d.now && d.compare != 0) ? Math.round(100*(d.now - d.compare)/d.compare) : 'N/A';
+
+    (percentChange < -10) ? linetip.style('fill', 'red') : linetip.style('fill', 'black');
+    linetip.text(formatDate(d.date).toLowerCase() + " => now: " + d.now + " vs " + d.compare + ' (' + percentChange + '%)'  );
   }
 };
 
@@ -177,7 +180,11 @@ Template.metrics.events({
   },
   'click .addMetric' : function(e) {
     e.preventDefault();
-    Metrics.insert({position:Metrics.findOne({}, {sort: {position:-1}}).position+1});
+    var metric = Metrics.findOne({}, {sort: {position:-1}});
+    var position = (metric && metric.position + 1) || 0;
+
+    Metrics.insert({position: position});
+
     mixpanel.track("Clicked crud-metrics/create");
   },
   'click .removeMetric': function(e){
