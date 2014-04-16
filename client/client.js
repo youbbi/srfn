@@ -56,7 +56,24 @@ Template.dashboard.metrics = function(){
 };
 
 Template.metric.options_string = function(){
-  return _.values(_.pick(this.options, ["event", "type", "where"])).join(" / ");
+
+   var textDescription = '';
+
+  if (!this.mixpanel_url_compare) {
+    textDescription = _.values(_.pick(this.options['mixpanel_url'], ["event", "type", "where"])).join(" / ");
+  } else {
+    var attributes = ["event", "type", "where"];
+    var options_compare = _.values(_.pick(this.options['mixpanel_url_compare'], ["event", "type", "where"]));
+    var options = _.values(_.pick(this.options['mixpanel_url'], ["event", "type", "where"]));
+
+
+    for (var i=0; i< options.length; i++) {
+      textDescription += ' Event:' + attributes[i] + '='
+      textDescription += (options[i] == options_compare[i]) ? options[i] : options[i] + ' // ' + options_compare[i];
+    }
+  }
+
+  return textDescription;
 };
 
 Template.metric.rendered = function(){
@@ -72,18 +89,37 @@ Template.metric.rendered = function(){
   var path = "#sparkline_"+this.data._id;
   var h = $(path).height(), w = $(path).width();
   var max=d3.max(json, function(o) { return d3.max([o.now, o.compare]); });
-  var x = d3.time.scale().domain(d3.extent(json, function(d) { return d.date; })).range([0, w]);
-  var y = d3.scale.linear().domain([0, max]).range([h, 0]);
-  var svg = d3.select(path).append("svg").attr("height", h).attr("width", w);
+
+  var x = d3.time.scale()
+                  .domain(d3.extent(json, function(d) { return d.date; }))
+                  .range([0, w]);
+
+  var y = d3.scale.linear()
+                  .domain([0, max])
+                  .range([h, 0]);
+
+  var yAxis = d3.svg.axis().scale(y)
+                            .ticks(3)
+                            .orient("left");
+
+  var svg = d3.select(path).append("svg")
+                            .attr("height", h)
+                            .attr("width", w);
+  // Add the y-axis.
+  svg.append("g")
+      .attr("class", "y axis")
+      .attr("transform", "translate(" + w + ", 0)")
+      .call(yAxis);
+
 
   var line = d3.svg.line()
-    .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.now); });
+                  .x(function(d) { return x(d.date); })
+                  .y(function(d) { return y(d.now); });
 
   var area = d3.svg.area()
-    .x(function(d) { return x(d.date); })
-    .y0(h)
-    .y1(function(d) { return y(d.compare); });
+                  .x(function(d) { return x(d.date); })
+                  .y0(h)
+                  .y1(function(d) { return y(d.compare); });
 
   var now = svg.selectAll(".now")
       .data([json])

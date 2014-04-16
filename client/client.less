@@ -48,13 +48,17 @@ body {
     font-size:10px;
   }
   .sparkline {
-    height: 40px;
+    height: 80px;
     cursor: pointer;
   }
   .now path {
     stroke-width: 1;
     stroke: rgba(100, 140, 180, 0.9);
     fill: none;
+  }
+  .y.axis line, .y.axis path {
+    fill: none;
+    stroke: #000;
   }
   .compare path {
     /*stroke: rgba(80, 120, 120, 0.2);*/
@@ -78,4 +82,11 @@ body {
 
 .nav {
   padding-right: 5px;
+}
+
+hr {
+  border-color: #EEEEEE -moz-use-text-color #FFFFFF;
+  border-style: solid none;
+  border-width: 1px 0;
+  margin: 18px 0;
 }

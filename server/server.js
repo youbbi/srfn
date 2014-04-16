@@ -19,7 +19,7 @@ var clean_url = function(mixpanel_url){
     delete o.path;
     delete o.href;
     var url =  Npm.require('url').format(o);
-    console.log(url);
+
     return url;
   }
 };
@@ -48,10 +48,13 @@ var fetch_metric = function(metric){
     from_date: moment().subtract("days",9).format("YYYY-MM-DD")
   };
 
+  // console.log('#fetch_metric: metric.options[mixpanel_url]=', metric.options['mixpanel_url']);
+
   mixpanel_exporter.segmentationSync = Meteor._wrapAsync(mixpanel_exporter.segmentation.bind(mixpanel_exporter));
-  result = mixpanel_exporter.segmentationSync(_.extend(metric.options, basics, now));
+  result = mixpanel_exporter.segmentationSync(_.extend(metric.options['mixpanel_url'], basics, now));
 
   res = JSON.parse(result.body);
+  console.log('#fetch_metric: res=', res);
   _.each(res.data.values, function(value, key){
     _.each(value, function(val, k){
       data.push({date:k,now:val});
@@ -62,9 +65,11 @@ var fetch_metric = function(metric){
       return datum.date;
   });
 
-  result = mixpanel_exporter.segmentationSync(_.extend(metric.options, basics, compare));
+  var compareUrl = metric.options['mixpanel_url_compare'] || metric.options['mixpanel_url'];
+  result = mixpanel_exporter.segmentationSync(_.extend(compareUrl, basics, compare));
 
   res = JSON.parse(result.body);
+
   _.each(res.data.values, function(value, key){
     _.each(value, function(val, k){
       data2.push({date:k,compare:val});
@@ -91,21 +96,35 @@ var fetch_metrics =  function(){
   });
 };
 
+var parseMixPanelUrl = function(metric) {
+
+  var newData = {options: {}};
+  var attributes = ['mixpanel_url']
+  if (metric['mixpanel_url_compare'] && metric['mixpanel_url_compare'].length) attributes.push('mixpanel_url_compare');
+
+  attributes.forEach(function(attribute){
+
+    var options = extract_options(metric[attribute]);
+    // console.log('options extracted for ' + attribute + ': ' + JSON.stringify(options));
+    if(!_.isEqual(options, metric[attribute].options)){
+      var clean = clean_url(metric[attribute]);
+      newData.options[attribute] = options;
+      newData[attribute] = clean;
+    }
+  })
+
+  Metrics.update({_id: metric._id}, {$set: newData}, function(err, res){
+      if (err) console.err('unable to update parseOptions, reason:', err);
+      fetch_metric(metric);
+  });
+}
+
 Meteor.methods({
   parseOptions: function(id){
     if(!Meteor.settings.demo){
       var metric  = Metrics.findOne({_id:id});
-      if(metric.mixpanel_url) {
-        var options = extract_options(metric.mixpanel_url);
-        if(!_.isEqual(options, metric.options)){
-          var clean = clean_url(metric.mixpanel_url);
-          metric.options = options;
-          metric.mixpanel_url = clean;
-          Metrics.update({_id: metric._id}, {$set: {options: options, mixpanel_url: clean}}, function(err, res){
-            fetch_metric(metric);
-          });
-        }
-      }
+      console.log('#parseOptions: parsing for id=' + id + ' with metric.mixpanel_url=' + metric.mixpanel_url);
+      parseMixPanelUrl(metric);
     }
   }
 });
